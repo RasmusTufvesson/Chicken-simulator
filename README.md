@@ -6,6 +6,9 @@ Right now there are two people on the development team
 
 The game is made in python using pygame
 
+
+
+
 Controls:
 
 wasd - movment
