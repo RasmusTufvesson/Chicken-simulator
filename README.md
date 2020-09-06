@@ -11,6 +11,8 @@ The game is made in python using pygame
 
 Controls:
 
+esc - menu
+
 wasd - movment
 
 e - pickup egg
