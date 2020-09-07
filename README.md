@@ -20,3 +20,10 @@ q - crack egg
 
 z - spawn eggs
 x - spawn chickens
+
+
+Python needs:
+
+- pygame
+
+- python 3
