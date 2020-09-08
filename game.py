@@ -1,5 +1,6 @@
 import pygame
 import random
+import sys
 
 def di(inp: dict):
     return random.choice(list(inp))
@@ -73,15 +74,19 @@ player_1_walk=(pygame.image.load('art/walk_r_1.png'), pygame.image.load('art/wal
 player_1_idle=(pygame.image.load('art/idle_r_1.png'), pygame.image.load('art/idle_r_2.png'))
 player_1_egg_1=(pygame.image.load('art/walk_r_1_egg_light.png'), pygame.image.load('art/walk_r_2_egg_light.png'), pygame.image.load('art/walk_r_3_egg_light.png'), pygame.image.load('art/walk_r_4_egg_light.png'))#pygame.image.load('art/player_r_egg_light.png')
 player_1_egg_2=(pygame.image.load('art/walk_r_1_egg_dark.png'), pygame.image.load('art/walk_r_2_egg_dark.png'), pygame.image.load('art/walk_r_3_egg_dark.png'), pygame.image.load('art/walk_r_4_egg_dark.png'))#pygame.image.load('art/player_r_egg_dark.png'),)
+player_1_egg_gold=(pygame.image.load('art/walk_r_1_egg_golden.png'), pygame.image.load('art/walk_r_2_egg_golden.png'), pygame.image.load('art/walk_r_3_egg_golden.png'), pygame.image.load('art/walk_r_4_egg_golden.png'))
 player_1_idle_egg_1=(pygame.image.load('art/idle_r_1_egg_light.png'), pygame.image.load('art/idle_r_2_egg_light.png'))
 player_1_idle_egg_2=(pygame.image.load('art/idle_r_1_egg_dark.png'), pygame.image.load('art/idle_r_2_egg_dark.png'))
+player_1_idle_egg_gold=(pygame.image.load('art/idle_r_1_egg_golden.png'), pygame.image.load('art/idle_r_2_egg_golden.png'))
 player_2=pygame.image.load('art/player_west.png')
 player_2_walk=(pygame.image.load('art/walk_l_1.png'), pygame.image.load('art/walk_l_2.png'), pygame.image.load('art/walk_l_3.png'), pygame.image.load('art/walk_l_4.png'))
 player_2_idle=(pygame.image.load('art/idle_l_1.png'), pygame.image.load('art/idle_l_2.png'))
 player_2_egg_1=(pygame.image.load('art/walk_l_1_egg_light.png'), pygame.image.load('art/walk_l_2_egg_light.png'), pygame.image.load('art/walk_l_3_egg_light.png'), pygame.image.load('art/walk_l_4_egg_light.png'))
 player_2_egg_2=(pygame.image.load('art/walk_l_1_egg_dark.png'), pygame.image.load('art/walk_l_2_egg_dark.png'), pygame.image.load('art/walk_l_3_egg_dark.png'), pygame.image.load('art/walk_l_4_egg_dark.png'))
+player_2_egg_gold=(pygame.image.load('art/walk_l_1_egg_golden.png'), pygame.image.load('art/walk_l_2_egg_golden.png'), pygame.image.load('art/walk_l_3_egg_golden.png'), pygame.image.load('art/walk_l_4_egg_golden.png'))
 player_2_idle_egg_1=(pygame.image.load('art/idle_l_1_egg_light.png'), pygame.image.load('art/idle_l_2_egg_light.png'))
 player_2_idle_egg_2=(pygame.image.load('art/idle_l_1_egg_dark.png'), pygame.image.load('art/idle_l_2_egg_dark.png'))
+player_2_idle_egg_gold=(pygame.image.load('art/idle_l_1_egg_golden.png'), pygame.image.load('art/idle_l_2_egg_golden.png'))
 #player_2_egg_1=(pygame.image.load('art/player_l_egg_light.png'),)
 #player_2_egg_2=(pygame.image.load('art/player_l_egg_dark.png'),)
 
@@ -103,7 +108,7 @@ def show_player():
 #move the player
 dir_r=True
 def move(ev):
-    global dir_r, an_speed, pos, speed, default_speed, player, player_1, player_2, animation, player_1_idle_egg_1, player_1_idle_egg_2, player_2_idle_egg_1, player_2_idle_egg_2, player_1_walk, player_2_walk, player_1_idle, player_2_idle, holding, player_1_egg_1, player_1_egg_2, player_2_egg_1, player_2_egg_2
+    global dir_r, an_speed, pos, speed, default_speed, player, player_1, player_2, animation, player_1_idle_egg_gold, player_2_idle_egg_gold, player_1_egg_gold, player_1_idle_egg_1, player_1_idle_egg_2, player_2_idle_egg_1, player_2_idle_egg_2, player_1_walk, player_2_walk, player_1_idle, player_2_idle, holding, player_1_egg_1, player_1_egg_2, player_2_egg_1, player_2_egg_2
     walk=True
     is_walk=False
     if ev[pygame.K_w]:
@@ -140,8 +145,10 @@ def move(ev):
             else:
                 if holding[1][2]==1:
                     animation=player_1_egg_1
-                else:
+                elif holding[1][2]==2:
                     animation=player_1_egg_2
+                else:
+                    animation=player_1_egg_gold
             an_speed=8
         else:
             if not holding[0]:
@@ -149,8 +156,10 @@ def move(ev):
             else:
                 if holding[1][2]==1:
                     animation=player_2_egg_1
-                else:
+                elif holding[1][2]==2:
                     animation=player_2_egg_2
+                else:
+                    animation=player_2_egg_gold
             #animation=player_2_walk
             an_speed=8
     else:
@@ -160,8 +169,10 @@ def move(ev):
             else:
                 if holding[1][2]==1:
                     animation=player_1_idle_egg_1#(player_1_egg_1[0],)
-                else:
+                elif holding[1][2]==2:
                     animation=player_1_idle_egg_2#(player_1_egg_2[0],)
+                else:
+                    animation=player_1_idle_egg_gold
             #animation=player_1_idle#(player_1,)
             an_speed=16
         else:
@@ -170,8 +181,10 @@ def move(ev):
             else:
                 if holding[1][2]==1:
                     animation=player_2_idle_egg_1#(player_2_egg_1[0],)
-                else:
+                elif holding[1][2]==2:
                     animation=player_2_idle_egg_2#(player_2_egg_2[0],)
+                else:
+                    animation=player_2_idle_egg_gold
             #animation=player_2_idle#(player_2,)
             an_speed=16
 
@@ -228,7 +241,7 @@ def inside_egg_radius(pos):
     yes=(False, None)
     for egg in eggs:
         egg_mid=get_mid_egg(eggs[egg][1])
-        if pos[0]>egg_mid[0]-50 and pos[0]<egg_mid[0]+50 and pos[1]>egg_mid[1]-50 and pos[1]<egg_mid[1]+50:
+        if pos[0]>egg_mid[0]-70 and pos[0]<egg_mid[0]+70 and pos[1]>egg_mid[1]-70 and pos[1]<egg_mid[1]+70:
             yes=(True, egg)
             break
     return yes
@@ -244,10 +257,14 @@ def pickup_egg(pos):
             #egg_num-=1
     else:
         if dir_r:
-            eggs[egg_num]=[holding[1][0], get_mid_player(pos), holding[1][2], holding[1][3], holding[1][4]]
+            new_pos=get_mid_player(pos)
+            eggs[egg_num]=[holding[1][0], (new_pos[0]+50, new_pos[1]+40), holding[1][2], holding[1][3], holding[1][4]]
+            #print (eggs[egg_num])
+            #pygame.draw.circle(screen, black, get_mid_player(pos), 10, 5)
         else:
             new_pos=get_mid_player(pos)
-            eggs[egg_num]=[holding[1][0], (new_pos[0]-80, new_pos[1]), holding[1][2], holding[1][3], holding[1][4]]
+            eggs[egg_num]=[holding[1][0], (new_pos[0]-50, new_pos[1]+40), holding[1][2], holding[1][3], holding[1][4]]
+            #print (eggs[egg_num])
         holding=(False, None)
         egg_num+=1
 
@@ -352,7 +369,7 @@ def animate_eggs():
                     chickens[chicken_num]=[th, list(save[1]), if_not(th, l1, l2, 1, 2, l3, 1), randpos()]
                 chicken_num+=1
         except:# Exception as er:
-            pass#print (er)
+            pass#print (sys.exc_info())#er)
     prev_time=rel_egg_timer
     for d in dels:
         del eggs[d]
