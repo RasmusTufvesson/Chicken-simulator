@@ -292,7 +292,7 @@ def get_mid_player(pos):
 #create a new random chicken
 chicken_num=0
 def new_chicken(gold=False):
-    global dis_x, dis_y, chickens, chicken_gold_1, chicken_gold_2, chicken_1_1, chicken_1_2, chicken_2_1, chicken_2_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_2_3, chicken_2_4, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_num
+    global dis_x, dis_y, achivements, chickens, chicken_gold_1, chicken_gold_2, chicken_1_1, chicken_1_2, chicken_2_1, chicken_2_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_2_3, chicken_2_4, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_num
     pos=[random.randint(0, dis_x), random.randint(0, dis_y)]
     ty=random.choice([chicken_1_1, chicken_2_1, chicken_2_2, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_2_3, chicken_2_4])
     ty2={chicken_1_1:1, chicken_1_2:2, chicken_2_1:1, chicken_2_2:2, chicken_1_3:1, chicken_1_4:2, chicken_2_3:1, chicken_2_4:3, chicken_1_5:1, chicken_1_6:2, chicken_1_7:1, chicken_1_8:2, chicken_2_5:1, chicken_2_6:2, chicken_2_7:1, chicken_2_8:2}#egg_1:1, egg_2:2}#random.choice([1, 2])
@@ -302,6 +302,20 @@ def new_chicken(gold=False):
         t=random.choice([chicken_gold_1, chicken_gold_2])
         chickens[chicken_num]=[t, pos, {chicken_gold_1:1, chicken_gold_2:2}[t], randpos()]
     chicken_num+=1
+    ad={chicken_gold_1:3, chicken_gold_2:3, chicken_1_1:1, chicken_1_2:1, chicken_2_1:2, chicken_2_2:2, chicken_1_3:1, chicken_1_4:2, chicken_2_3:2, chicken_2_4:2, chicken_1_5:1, chicken_1_6:1, chicken_1_7:1, chicken_1_8:1, chicken_2_5:2, chicken_2_6:2, chicken_2_7:2, chicken_2_8:2}#{1:'got'}
+    ad2={1:'Normal Chicken!', 2:'Brown Chicken!', 3:'Golden Chicken!'}
+    #adl=['Normal Chicken!', 'Brown Chicken!', 'Golden Chicken!']
+    #i=False
+    #for a in achivements:
+    #    if a in adl:
+    #        i=True
+    #        break
+    #if not i:
+    if ad2[ad[ty]] not in achivements:
+        advance(ad2[ad[ty]])
+    #    print (ad2[ad[ty]])
+    #else:
+    #    print (ad2[ad[ty]])#('no!', achivements)
 
 #show all chickens
 def show_chickens():
@@ -407,9 +421,9 @@ def randpos():
     return [random.randint(0, dis_x), random.randint(0, dis_y)]
 
 def advance(name):
-    global achivements, event
+    global achivements, event_text
     achivements.append(name)
-    event=name
+    event_text=name
 
 """
 step=0
