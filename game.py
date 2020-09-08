@@ -97,6 +97,7 @@ holding=(False, None)
 pos=mid_pos
 speed=1
 default_speed=5
+achivements=[]
 
 #show the player
 def show_player():
@@ -405,6 +406,11 @@ def randpos():
     global dis_x, dis_y
     return [random.randint(0, dis_x), random.randint(0, dis_y)]
 
+def advance(name):
+    global achivements, event
+    achivements.append(name)
+    event=name
+
 """
 step=0
 rel_step=0
@@ -433,6 +439,7 @@ money=0
 instart=True
 inmenu=False
 inshot=False
+event_text=''
 
 start_image=pygame.image.load('art/start.png')
 start_image_pos=start_image.get_rect()
@@ -478,6 +485,13 @@ while on:
         re.center=(-dis_x+(dis_x+len(list('Money: '+str(money)))*7), -dis_y+(dis_y+20))
         screen.blit(text, re)
         if not inmenu:
+            ev_text=font.render(event_text, False, black)
+            evt_box=ev_text.get_rect()
+            evt_box.center=(dis_x//2, dis_y-30)
+            ev_box=textbox.get_rect()
+            ev_box.center=evt_box.center
+            screen.blit(textbox, ev_box)
+            screen.blit(ev_text, evt_box)
             animate_eggs()
             show_eggs()
             for chi in chickens:
@@ -576,6 +590,8 @@ while on:
                 if press[pygame.K_q]:
                     crack_egg(pos)
                     cooldown=10
+                if press[pygame.K_c]:
+                    event_text=random.choice(['got a meme!', 'Yay! you unlocked a meme channel!', '[incert text here]', 'this is text'])
             if len(chickens)>0:
                 if eggdown<=0:
                     lay_egg(random.dict_choice(chickens))

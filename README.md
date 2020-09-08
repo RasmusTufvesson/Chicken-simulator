@@ -20,6 +20,7 @@ q - crack egg
 
 z - spawn eggs
 x - spawn chickens
+c - show random text
 
 
 Python needs:
