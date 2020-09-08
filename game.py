@@ -461,7 +461,10 @@ start_image_pos.center=(dis_x//2, dis_y//4)
 
 #get all text
 font=pygame.font.Font('freesansbold.ttf', 20)
-exit_text=font.render('Exit', False, black)
+if random.randint(1, 100)!=1:
+    exit_text=font.render('Exit', False, black)
+else:
+    exit_text=font.render('Eggsit', False, black)
 exit_text_cords=exit_text.get_rect()
 exit_text_cords.center=(dis_x//2, dis_y//2)
 shop_text=font.render('Shop', False, black)
