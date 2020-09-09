@@ -295,14 +295,14 @@ def new_chicken(gold=False):
     global dis_x, dis_y, achivements, chickens, chicken_gold_1, chicken_gold_2, chicken_1_1, chicken_1_2, chicken_2_1, chicken_2_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_2_3, chicken_2_4, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_num
     pos=[random.randint(0, dis_x), random.randint(0, dis_y)]
     ty=random.choice([chicken_1_1, chicken_2_1, chicken_2_2, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_2_3, chicken_2_4])
-    ty2={chicken_1_1:1, chicken_1_2:2, chicken_2_1:1, chicken_2_2:2, chicken_1_3:1, chicken_1_4:2, chicken_2_3:1, chicken_2_4:3, chicken_1_5:1, chicken_1_6:2, chicken_1_7:1, chicken_1_8:2, chicken_2_5:1, chicken_2_6:2, chicken_2_7:1, chicken_2_8:2}#egg_1:1, egg_2:2}#random.choice([1, 2])
+    ty2={chicken_gold_1:3, chicken_gold_2:3, chicken_1_1:1, chicken_1_2:2, chicken_2_1:1, chicken_2_2:2, chicken_1_3:1, chicken_1_4:2, chicken_2_3:1, chicken_2_4:2, chicken_1_5:1, chicken_1_6:2, chicken_1_7:1, chicken_1_8:2, chicken_2_5:1, chicken_2_6:2, chicken_2_7:1, chicken_2_8:2}#egg_1:1, egg_2:2}#random.choice([1, 2])
     if not gold:
         chickens[chicken_num]=[ty, pos, ty2[ty], randpos()]
     else:
-        t=random.choice([chicken_gold_1, chicken_gold_2])
-        chickens[chicken_num]=[t, pos, {chicken_gold_1:1, chicken_gold_2:2}[t], randpos()]
+        ty=random.choice([chicken_gold_1, chicken_gold_2])
+        chickens[chicken_num]=[ty, pos, 3, randpos()]#{chicken_gold_1:1, chicken_gold_2:2}[t]
     chicken_num+=1
-    ad={chicken_gold_1:3, chicken_gold_2:3, chicken_1_1:1, chicken_1_2:1, chicken_2_1:2, chicken_2_2:2, chicken_1_3:1, chicken_1_4:2, chicken_2_3:2, chicken_2_4:2, chicken_1_5:1, chicken_1_6:1, chicken_1_7:1, chicken_1_8:1, chicken_2_5:2, chicken_2_6:2, chicken_2_7:2, chicken_2_8:2}#{1:'got'}
+    #ad={1:}#chicken_gold_1:3, chicken_gold_2:3, chicken_1_1:1, chicken_1_2:1, chicken_2_1:2, chicken_2_2:2, chicken_1_3:1, chicken_1_4:2, chicken_2_3:2, chicken_2_4:2, chicken_1_5:1, chicken_1_6:1, chicken_1_7:1, chicken_1_8:1, chicken_2_5:2, chicken_2_6:2, chicken_2_7:2, chicken_2_8:2}#{1:'got'}
     ad2={1:'Normal Chicken!', 2:'Brown Chicken!', 3:'Golden Chicken!'}
     #adl=['Normal Chicken!', 'Brown Chicken!', 'Golden Chicken!']
     #i=False
@@ -311,8 +311,13 @@ def new_chicken(gold=False):
     #        i=True
     #        break
     #if not i:
-    if ad2[ad[ty]] not in achivements:
-        advance(ad2[ad[ty]])
+    if ad2[ty2[ty]] not in achivements:#ad2[ad[ty]]
+        if not gold:
+            advance(ad2[ty2[ty]])#ad2[ad[ty]])
+        else:
+            advance('Golden Chicken!')
+    #else:
+    #    print (ad2[ty2[ty]])#ad[ty]])
     #    print (ad2[ad[ty]])
     #else:
     #    print (ad2[ad[ty]])#('no!', achivements)
@@ -454,6 +459,7 @@ instart=True
 inmenu=False
 inshot=False
 event_text=''
+inad=False
 
 start_image=pygame.image.load('art/start.png')
 start_image_pos=start_image.get_rect()
@@ -485,6 +491,9 @@ main_text_pos.center=(dis_x//2, (dis_y//4)*3)
 #main_exit_text=font.render('Exit', False, black)
 main_exit_text_cords=exit_text.get_rect()
 main_exit_text_cords.center=(dis_x//2, (dis_y//4)*3)
+ad_text=font.render('Advancements', False, black)
+ad_text_pos=ad_text.get_rect()
+ad_text_pos.center=(dis_x//2, (dis_y//4)//2)
 
 #mainloop
 on=True
@@ -534,6 +543,10 @@ while on:
                 main_pos.center=(dis_x//2, (dis_y//4)*3)
                 screen.blit(main_box, main_pos)
                 screen.blit(main_text, main_text_pos)
+                ad_pos=textbox.get_rect()
+                ad_pos.center=ad_text_pos.center
+                screen.blit(textbox, ad_pos)
+                screen.blit(ad_text, ad_text_pos)
                 #print (type(box.get_rect()))
                 #check if player clicked anything
                 if pygame.mouse.get_pressed()[0]:
@@ -545,36 +558,56 @@ while on:
                     elif main_pos.collidepoint(*mouse):
                         instart=True
                         cooldown=15
+                    elif ad_pos.collidepoint(*mouse):
+                        inad=True
+                        inshop=True
             else:
-                pro_box=textbox
-                pro_pos=pro_box.get_rect()
-                pro_pos.center=(dis_x//2, dis_y//2)
-                screen.blit(pro_box, pro_pos)
-                screen.blit(pro_text, pro_text_pos)
-                chi_box=textbox
-                chib_pos=chi_box.get_rect()
-                chib_pos.center=(dis_x//2, dis_y//4)
-                screen.blit(chi_box, chib_pos)
-                screen.blit(chi_text, chi_pos)
-                #check if player bought anything
-                if shopdown<=0:
-                    if pygame.mouse.get_pressed()[0]:
-                        mouse=pygame.mouse.get_pos()
-                        if pro_pos.collidepoint(*mouse):
-                            if money>=5:
-                                money-=5
-                                production_speed+=1
-                                shopdown=5
-                        if chib_pos.collidepoint(*mouse):
-                            if money>=15:
-                                money-=15
-                                if random.randint(1, 30):
-                                    new_chicken(True)
-                                else:
-                                    new_chicken()
-                                shopdown=5
+                if not inad:
+                    pro_box=textbox
+                    pro_pos=pro_box.get_rect()
+                    pro_pos.center=(dis_x//2, dis_y//2)
+                    screen.blit(pro_box, pro_pos)
+                    screen.blit(pro_text, pro_text_pos)
+                    chi_box=textbox
+                    chib_pos=chi_box.get_rect()
+                    chib_pos.center=(dis_x//2, dis_y//4)
+                    screen.blit(chi_box, chib_pos)
+                    screen.blit(chi_text, chi_pos)
+                    #check if player bought anything
+                    if shopdown<=0:
+                        if pygame.mouse.get_pressed()[0]:
+                            mouse=pygame.mouse.get_pos()
+                            if pro_pos.collidepoint(*mouse):
+                                if money>=5:
+                                    money-=5
+                                    production_speed+=1
+                                    shopdown=5
+                            if chib_pos.collidepoint(*mouse):
+                                if money>=15:
+                                    money-=15
+                                    if random.randint(1, 30):
+                                        new_chicken(True)
+                                    else:
+                                        new_chicken()
+                                    shopdown=5
+                    else:
+                        shopdown-=1
                 else:
-                    shopdown-=1
+                    #po=(dis_x//2, (dis_y//4)//2)
+                    po=[dis_x//2, 40]
+                    #show advacements
+                    for ad in achivements:
+                        #get advancement
+                        t=font.render(ad, False, black)
+                        r=t.get_rect()
+                        r.center=tuple(po)
+                        r2=textbox.get_rect()
+                        r2.center=r.center
+                        #draw advancement
+                        screen.blit(textbox, r2)
+                        screen.blit(t, r)
+                        #add to y poition
+                        po[1]+=80
             #draw cursor
             p=pygame.mouse.get_pos()
             pygame.draw.circle(screen, white, p, 30, 3)
@@ -591,6 +624,7 @@ while on:
             if press[pygame.K_ESCAPE]:
                 inmenu=not inmenu
                 inshop=False
+                inad=False
                 cooldown=10
         else:
             cooldown-=1
@@ -636,6 +670,7 @@ while on:
                 instart=False
                 inmenu=False
                 inshop=False
+                inad=False
         if cooldown<=0:
             if pygame.mouse.get_pressed()[0]:
                 if box_pos.collidepoint(*p):
