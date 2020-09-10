@@ -1,6 +1,6 @@
 import pygame
 import random
-import sys
+#import sys
 
 def di(inp: dict):
     return random.choice(list(inp))
@@ -98,6 +98,7 @@ pos=mid_pos
 speed=1
 default_speed=5
 achivements=[]
+avatar=1
 
 #show the player
 def show_player():
@@ -109,18 +110,24 @@ def show_player():
 #move the player
 dir_r=True
 def move(ev):
-    global dir_r, an_speed, controls, pos, speed, default_speed, player, player_1, player_2, animation, player_1_idle_egg_gold, player_2_idle_egg_gold, player_1_egg_gold, player_1_idle_egg_1, player_1_idle_egg_2, player_2_idle_egg_1, player_2_idle_egg_2, player_1_walk, player_2_walk, player_1_idle, player_2_idle, holding, player_1_egg_1, player_1_egg_2, player_2_egg_1, player_2_egg_2
+    global dir_r, an_speed, controls, dis_x, dis_y, pos, speed, default_speed, player, player_1, player_2, chicken_1_7, chicken_1_8, chicken_2_7, chicken_2_8, chicken_gold_1, chicken_gold_2, animation, player_1_idle_egg_gold, player_2_idle_egg_gold, player_1_egg_gold, player_1_idle_egg_1, player_1_idle_egg_2, player_2_idle_egg_1, player_2_idle_egg_2, player_1_walk, player_2_walk, player_1_idle, player_2_idle, holding, player_1_egg_1, player_1_egg_2, player_2_egg_1, player_2_egg_2
     #pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_e, pygame.K_q
     walk=True
     is_walk=False
     if ev[controls[0]]:#pygame.K_w]:
+        past=pos[1]
         pos[1]-=default_speed*speed
         walk=True
         is_walk=True
+        if pos[1]<0:
+            pos[1]=past
     elif ev[controls[2]]:#pygame.K_s]:
+        past=pos[1]
         pos[1]+=default_speed*speed
         walk=True
         is_walk=True
+        if pos[1]>dis_y:
+            pos[1]=past
     else:
         walk=False
     if ev[controls[1]]:#pygame.K_a]:
@@ -128,67 +135,101 @@ def move(ev):
             player=player_2
             animation=(player_2,)
             dir_r=False
+        past=pos[0]
         pos[0]-=default_speed*speed
         walk=True
+        if pos[0]<0:
+            pos[0]=past
     elif ev[controls[3]]:#pygame.K_d]:
         if not dir_r:#player==player_2:
             player=player_1
             animation=(player_1,)
             dir_r=True
+        past=pos[0]
         pos[0]+=default_speed*speed
+        if pos[0]>dis_x:
+            pos[0]=past
         walk=True
     elif not is_walk:
         walk=False
     #print (str((player, player_1)))#(player==player_1)
     if walk:
         if dir_r:#player==player_1:#animation==(player_1,):# or animation==player_1_walk:# or animation==player_1_idle:
-            if not holding[0]:
-                animation=player_1_walk
-            else:
-                if holding[1][2]==1:
-                    animation=player_1_egg_1
-                elif holding[1][2]==2:
-                    animation=player_1_egg_2
+            if avatar==1:
+                if not holding[0]:
+                    animation=player_1_walk
                 else:
-                    animation=player_1_egg_gold
-            an_speed=8
+                    if holding[1][2]==1:
+                        animation=player_1_egg_1
+                    elif holding[1][2]==2:
+                        animation=player_1_egg_2
+                    else:
+                        animation=player_1_egg_gold
+                an_speed=8
+            elif avatar==2:
+                animation=(chicken_gold_2,)
+            elif avatar==3:
+                animation=(chicken_2_7,)
+            elif avatar==4:
+                animation=(chicken_2_8,)
         else:
-            if not holding[0]:
-                animation=player_2_walk
-            else:
-                if holding[1][2]==1:
-                    animation=player_2_egg_1
-                elif holding[1][2]==2:
-                    animation=player_2_egg_2
+            if avatar==1:
+                if not holding[0]:
+                    animation=player_2_walk
                 else:
-                    animation=player_2_egg_gold
-            #animation=player_2_walk
-            an_speed=8
+                    if holding[1][2]==1:
+                        animation=player_2_egg_1
+                    elif holding[1][2]==2:
+                        animation=player_2_egg_2
+                    else:
+                        animation=player_2_egg_gold
+                #animation=player_2_walk
+                an_speed=8
+            elif avatar==2:
+                animation=(chicken_gold_1,)
+            elif avatar==3:
+                animation=(chicken_1_7,)
+            elif avatar==4:
+                animation=(chicken_1_8,)
     else:
         if dir_r:#player==player_1:#animation==player_1_walk or animation==(player_1,):# or animation==player_1_idle:
-            if not holding[0]:
-                animation=player_1_idle
-            else:
-                if holding[1][2]==1:
-                    animation=player_1_idle_egg_1#(player_1_egg_1[0],)
-                elif holding[1][2]==2:
-                    animation=player_1_idle_egg_2#(player_1_egg_2[0],)
+            if avatar==1:
+                if not holding[0]:
+                    animation=player_1_idle
                 else:
-                    animation=player_1_idle_egg_gold
-            #animation=player_1_idle#(player_1,)
-            an_speed=16
+                    if holding[1][2]==1:
+                        animation=player_1_idle_egg_1#(player_1_egg_1[0],)
+                    elif holding[1][2]==2:
+                        animation=player_1_idle_egg_2#(player_1_egg_2[0],)
+                    else:
+                        animation=player_1_idle_egg_gold
+                #animation=player_1_idle#(player_1,)
+                an_speed=16
+            elif avatar==2:
+                animation=(chicken_gold_2,)
+            elif avatar==3:
+                animation=(chicken_2_7,)
+            elif avatar==4:
+                animation=(chicken_2_8,)
         else:
-            if not holding[0]:
-                animation=player_2_idle
-            else:
-                if holding[1][2]==1:
-                    animation=player_2_idle_egg_1#(player_2_egg_1[0],)
-                elif holding[1][2]==2:
-                    animation=player_2_idle_egg_2#(player_2_egg_2[0],)
+            if avatar==1:
+                if not holding[0]:
+                    animation=player_2_idle
                 else:
-                    animation=player_2_idle_egg_gold
-            #animation=player_2_idle#(player_2,)
-            an_speed=16
+                    if holding[1][2]==1:
+                        animation=player_2_idle_egg_1#(player_2_egg_1[0],)
+                    elif holding[1][2]==2:
+                        animation=player_2_idle_egg_2#(player_2_egg_2[0],)
+                    else:
+                        animation=player_2_idle_egg_gold
+                #animation=player_2_idle#(player_2,)
+                an_speed=16
+            elif avatar==2:
+                animation=(chicken_gold_1,)
+            elif avatar==3:
+                animation=(chicken_1_7,)
+            elif avatar==4:
+                animation=(chicken_1_8,)
 
 #animate the player
 step=0
@@ -480,7 +521,7 @@ inad=False
 insettings=False
 
 controls=[pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_e, pygame.K_q]
-used_keys=[pygame.K_ESCAPE, pygame.K_z, pygame.K_x, pygame.K_c]
+used_keys=[pygame.K_ESCAPE, pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v]
 free_bind=False
 
 start_image=pygame.image.load('art/start.png')
@@ -737,6 +778,11 @@ while on:
                     cooldown=10
                 if press[controls[5]]:#pygame.K_q]:
                     crack_egg(pos)
+                    cooldown=10
+                if press[pygame.K_v]:
+                    avatar+=1
+                    if avatar==5:
+                        avatar=1
                     cooldown=10
             if press[pygame.K_c]:
                 event_text=random.choice(['got a meme!', 'Yay! you unlocked a meme channel!', '[incert text here]', 'this is text'])
