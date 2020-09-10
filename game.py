@@ -383,11 +383,13 @@ def animate_eggs():
                     l2=[chicken_2_2, chicken_2_4, chicken_2_6, chicken_2_8]
                     chickens[chicken_num]=[th, list(save[1]), if_not_2(th, l1, l2, 1, 2), randpos()]
                 else:#if save[2]==3:
-                    th=random.choice([chicken_1_1, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_gold_1, chicken_2_1, chicken_2_2, chicken_2_3, chicken_2_4, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_gold_2])
-                    l1=[chicken_1_1, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8]
-                    l2=[chicken_2_1, chicken_2_2, chicken_2_3, chicken_2_4, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8]
-                    l3={chicken_gold_1:3, chicken_gold_2:4}
-                    chickens[chicken_num]=[th, list(save[1]), if_not(th, l1, l2, 1, 2, l3, 1), randpos()]
+                    th=random.choice([chicken_gold_1, chicken_gold_2])#random.choice([chicken_1_1, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_gold_1, chicken_2_1, chicken_2_2, chicken_2_3, chicken_2_4, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_gold_2])
+                    #l1=[chicken_1_1, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8]
+                    #l2=[chicken_2_1, chicken_2_2, chicken_2_3, chicken_2_4, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8]
+                    #l3={chicken_gold_1:3, chicken_gold_2:4}
+                    #l1=[chicken_gold_1]
+                    #l2=[chicken_gold_2]
+                    chickens[chicken_num]=[th, list(save[1]), 3, randpos()]#if_not(th, l1, l2, 1, 2, l3, 1)
                 chicken_num+=1
         except:# Exception as er:
             pass#print (sys.exc_info())#er)
@@ -398,7 +400,7 @@ def animate_eggs():
 #get a specific chicken to lay an egg
 def lay_egg(chi):
     global chickens
-    if chickens[chi][2]==3 and random.randint(1,10)==1:
+    if chickens[chi][2]==3 and random.randint(1,100)==1:
         new_egg(chickens[chi][1], True)
     else:
         new_egg(chickens[chi][1])
