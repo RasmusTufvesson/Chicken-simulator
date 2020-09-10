@@ -109,27 +109,28 @@ def show_player():
 #move the player
 dir_r=True
 def move(ev):
-    global dir_r, an_speed, pos, speed, default_speed, player, player_1, player_2, animation, player_1_idle_egg_gold, player_2_idle_egg_gold, player_1_egg_gold, player_1_idle_egg_1, player_1_idle_egg_2, player_2_idle_egg_1, player_2_idle_egg_2, player_1_walk, player_2_walk, player_1_idle, player_2_idle, holding, player_1_egg_1, player_1_egg_2, player_2_egg_1, player_2_egg_2
+    global dir_r, an_speed, controls, pos, speed, default_speed, player, player_1, player_2, animation, player_1_idle_egg_gold, player_2_idle_egg_gold, player_1_egg_gold, player_1_idle_egg_1, player_1_idle_egg_2, player_2_idle_egg_1, player_2_idle_egg_2, player_1_walk, player_2_walk, player_1_idle, player_2_idle, holding, player_1_egg_1, player_1_egg_2, player_2_egg_1, player_2_egg_2
+    #pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_e, pygame.K_q
     walk=True
     is_walk=False
-    if ev[pygame.K_w]:
+    if ev[controls[0]]:#pygame.K_w]:
         pos[1]-=default_speed*speed
         walk=True
         is_walk=True
-    elif ev[pygame.K_s]:
+    elif ev[controls[2]]:#pygame.K_s]:
         pos[1]+=default_speed*speed
         walk=True
         is_walk=True
     else:
         walk=False
-    if ev[pygame.K_a]:
+    if ev[controls[1]]:#pygame.K_a]:
         if dir_r:#player==player_1:
             player=player_2
             animation=(player_2,)
             dir_r=False
         pos[0]-=default_speed*speed
         walk=True
-    elif ev[pygame.K_d]:
+    elif ev[controls[3]]:#pygame.K_d]:
         if not dir_r:#player==player_2:
             player=player_1
             animation=(player_1,)
@@ -430,6 +431,20 @@ def advance(name):
     achivements.append(name)
     event_text=name
 
+def wait_for_key():
+    global on
+    key=False
+    while not key:
+        for ev in pygame.event.get():
+            if ev.type==pygame.QUIT:
+                on=False
+                key=True
+            elif ev.type==pygame.KEYDOWN:
+                return ev.key
+
+def key_name(key):
+    return pygame.key.name(key)
+
 """
 step=0
 rel_step=0
@@ -460,6 +475,11 @@ inmenu=False
 inshot=False
 event_text=''
 inad=False
+insettings=False
+
+controls=[pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_e, pygame.K_q]
+used_keys=[pygame.K_ESCAPE, pygame.K_z, pygame.K_x, pygame.K_c]
+free_bind=False
 
 start_image=pygame.image.load('art/start.png')
 start_image_pos=start_image.get_rect()
@@ -494,6 +514,11 @@ main_exit_text_cords.center=(dis_x//2, (dis_y//4)*3)
 ad_text=font.render('Advancements', False, black)
 ad_text_pos=ad_text.get_rect()
 ad_text_pos.center=(dis_x//2, (dis_y//4)//2)
+set_text=font.render('Settings', False, black)
+set_post=set_text.get_rect()
+set_post.center=(dis_x//2, dis_y-((dis_y//4)//2))
+set_pos=textbox.get_rect()
+set_pos.center=set_post.center
 
 #mainloop
 on=True
@@ -527,41 +552,7 @@ while on:
             show_player()
         else:
             #check if not in the shop
-            if not inshop:
-                exit_box=textbox
-                box_pos=exit_box.get_rect()#pygame.Rect((dis_x//2)-160, (dis_y//2)-30, (dis_x//2)+160, (dis_y//2)+30)
-                box_pos.center=(dis_x//2, dis_y//2)
-                screen.blit(exit_box, box_pos)
-                screen.blit(exit_text, exit_text_cords)
-                shop_box=textbox
-                shop_pos=shop_box.get_rect()
-                shop_pos.center=(dis_x//2, dis_y//4)
-                screen.blit(shop_box, shop_pos)
-                screen.blit(shop_text, shop_text_cords)
-                main_box=textbox
-                main_pos=main_box.get_rect()
-                main_pos.center=(dis_x//2, (dis_y//4)*3)
-                screen.blit(main_box, main_pos)
-                screen.blit(main_text, main_text_pos)
-                ad_pos=textbox.get_rect()
-                ad_pos.center=ad_text_pos.center
-                screen.blit(textbox, ad_pos)
-                screen.blit(ad_text, ad_text_pos)
-                #print (type(box.get_rect()))
-                #check if player clicked anything
-                if pygame.mouse.get_pressed()[0]:
-                    mouse=pygame.mouse.get_pos()
-                    if box_pos.collidepoint(*mouse):
-                        on=False
-                    elif shop_pos.collidepoint(*mouse):
-                        inshop=True
-                    elif main_pos.collidepoint(*mouse):
-                        instart=True
-                        cooldown=15
-                    elif ad_pos.collidepoint(*mouse):
-                        inad=True
-                        inshop=True
-            else:
+            if inshop:
                 if not inad:
                     pro_box=textbox
                     pro_pos=pro_box.get_rect()
@@ -608,6 +599,109 @@ while on:
                         screen.blit(t, r)
                         #add to y poition
                         po[1]+=80
+            elif insettings:
+                for_text=font.render('Forward: '+key_name(controls[0]), False, black)
+                back_text=font.render('Backward: '+key_name(controls[2]), False, black)
+                ri_text=font.render('Right: '+key_name(controls[3]), False, black)
+                le_text=font.render('Left: '+key_name(controls[1]), False, black)
+                in_text=font.render('Pickup: '+key_name(controls[4]), False, black)
+                cr_text=font.render('Crack: '+key_name(controls[5]), False, black)
+                tftof={True:'On', False:'Off'}
+                du_text=font.render('Free bind: '+tftof[free_bind], False, black)
+                con=[for_text, back_text, ri_text, le_text, in_text, cr_text]
+                li={}
+                po=[dis_x//2, 40]
+                for t in con:
+                    #make text position
+                    r=t.get_rect()
+                    r.center=tuple(po)
+                    r2=textbox.get_rect()
+                    r2.center=r.center
+                    #print (type(li))
+                    li[len(li)]=r2, tuple(po)
+                    #print (type(li))
+                    #draw control
+                    screen.blit(textbox, r2)
+                    screen.blit(t, r)
+                    #add to y poition
+                    po[1]+=80
+                r=du_text.get_rect()
+                r.center=tuple(po)
+                du_box=textbox.get_rect()
+                du_box.center=r.center
+                screen.blit(textbox, du_box)
+                screen.blit(du_text, r)
+                if pygame.mouse.get_pressed()[0]:
+                    poo=pygame.mouse.get_pos()
+                    do=True
+                    if cooldown<=0:
+                        if du_box.collidepoint(*poo):
+                            do=False
+                            cooldown=5
+                            free_bind=not free_bind
+                    else:
+                        cooldown-=1
+                    if do:
+                        rel_con={0:0, 1:2, 2:3, 3:1, 4:4, 5:5}
+                        for c in li:
+                            if li[c][0].collidepoint(*poo):
+                                t=font.render('Waiting...', False, black)
+                                p=t.get_rect()
+                                p.center=li[c][1]
+                                p2=textbox.get_rect()
+                                p2.center=p.center
+                                screen.blit(textbox, p2)
+                                screen.blit(t, p)
+                                pygame.display.update()
+                                k=wait_for_key()
+                                if not free_bind:
+                                    if k not in used_keys and k not in controls:
+                                        controls[rel_con[c]]=k
+                                else:
+                                    controls[rel_con[c]]=k
+                                    #print (c)
+            else:
+                exit_box=textbox
+                box_pos=exit_box.get_rect()#pygame.Rect((dis_x//2)-160, (dis_y//2)-30, (dis_x//2)+160, (dis_y//2)+30)
+                box_pos.center=(dis_x//2, dis_y//2)
+                screen.blit(exit_box, box_pos)
+                screen.blit(exit_text, exit_text_cords)
+                shop_box=textbox
+                shop_pos=shop_box.get_rect()
+                shop_pos.center=(dis_x//2, dis_y//4)
+                screen.blit(shop_box, shop_pos)
+                screen.blit(shop_text, shop_text_cords)
+                main_box=textbox
+                main_pos=main_box.get_rect()
+                main_pos.center=(dis_x//2, (dis_y//4)*3)
+                screen.blit(main_box, main_pos)
+                screen.blit(main_text, main_text_pos)
+                ad_pos=textbox.get_rect()
+                ad_pos.center=ad_text_pos.center
+                screen.blit(textbox, ad_pos)
+                screen.blit(ad_text, ad_text_pos)
+                screen.blit(textbox, set_pos)
+                screen.blit(set_text, set_post)
+                #print (type(box.get_rect()))
+                #check if player clicked anything
+                if pygame.mouse.get_pressed()[0]:
+                    mouse=pygame.mouse.get_pos()
+                    if box_pos.collidepoint(*mouse):
+                        on=False
+                    elif shop_pos.collidepoint(*mouse):
+                        inad=False
+                        inshop=True
+                    elif main_pos.collidepoint(*mouse):
+                        instart=True
+                        cooldown=15
+                    elif ad_pos.collidepoint(*mouse):
+                        inad=True
+                        inshop=True
+                    elif set_pos.collidepoint(*mouse):
+                        insettings=True
+                        inshop=False
+                        cooldown=10
+                
             #draw cursor
             p=pygame.mouse.get_pos()
             pygame.draw.circle(screen, white, p, 30, 3)
@@ -625,6 +719,7 @@ while on:
                 inmenu=not inmenu
                 inshop=False
                 inad=False
+                insettings=False
                 cooldown=10
         else:
             cooldown-=1
@@ -635,14 +730,14 @@ while on:
             if press[pygame.K_x]:
                 new_chicken(random.choice([False, False, True]))
             if cooldown<=0:
-                if press[pygame.K_e]:
+                if press[controls[4]]:#pygame.K_e]:
                     pickup_egg(pos)
                     cooldown=10
-                if press[pygame.K_q]:
+                if press[controls[5]]:#pygame.K_q]:
                     crack_egg(pos)
                     cooldown=10
-                if press[pygame.K_c]:
-                    event_text=random.choice(['got a meme!', 'Yay! you unlocked a meme channel!', '[incert text here]', 'this is text'])
+            if press[pygame.K_c]:
+                event_text=random.choice(['got a meme!', 'Yay! you unlocked a meme channel!', '[incert text here]', 'this is text'])
             if len(chickens)>0:
                 if eggdown<=0:
                     lay_egg(random.dict_choice(chickens))
@@ -671,6 +766,7 @@ while on:
                 inmenu=False
                 inshop=False
                 inad=False
+                insettings=False
         if cooldown<=0:
             if pygame.mouse.get_pressed()[0]:
                 if box_pos.collidepoint(*p):
