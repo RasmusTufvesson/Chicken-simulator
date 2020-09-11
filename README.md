@@ -22,6 +22,8 @@ z - spawn eggs
 x - spawn chickens
 c - show random text
 v - change avatar
+b - on/off show accessories
+n - on/off generate accessories
 
 
 Python needs:

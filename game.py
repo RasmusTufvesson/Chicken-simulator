@@ -34,6 +34,10 @@ clock=pygame.time.Clock()
 
 #load everything that does not fit into any special group
 textbox=pygame.image.load('art/textbox.png')
+empty=pygame.image.load('art/empty.png')
+
+#load chicken hats n' stuff
+chicken_hats=(pygame.image.load('art/chick_wiz.png'), pygame.image.load('art/chick_hat.png'), pygame.image.load('art/chick_hat_2.png'), pygame.image.load('art/chick_tophat.png'))
 
 #load all the eggs
 egg_1=pygame.image.load('art/egg_light.png')
@@ -331,18 +335,24 @@ def get_mid_player(pos):
     #80x170
     return pos#(pos[0]+40, pos[1]+85)
 
+def get_if(i, out1, out2):
+    if i:
+        return random.choice(out1)
+    else:
+        return out2
+
 #create a new random chicken
 chicken_num=0
 def new_chicken(gold=False):
-    global dis_x, dis_y, achivements, chickens, chicken_gold_1, chicken_gold_2, chicken_1_1, chicken_1_2, chicken_2_1, chicken_2_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_2_3, chicken_2_4, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_num
+    global dis_x, dis_y, gen_ac, empty, chicken_hats, achivements, chickens, chicken_gold_1, chicken_gold_2, chicken_1_1, chicken_1_2, chicken_2_1, chicken_2_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_2_3, chicken_2_4, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_num
     pos=[random.randint(0, dis_x), random.randint(0, dis_y)]
     ty=random.choice([chicken_1_1, chicken_2_1, chicken_2_2, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_2_3, chicken_2_4])
     ty2={chicken_gold_1:3, chicken_gold_2:3, chicken_1_1:1, chicken_1_2:2, chicken_2_1:1, chicken_2_2:2, chicken_1_3:1, chicken_1_4:2, chicken_2_3:1, chicken_2_4:2, chicken_1_5:1, chicken_1_6:2, chicken_1_7:1, chicken_1_8:2, chicken_2_5:1, chicken_2_6:2, chicken_2_7:1, chicken_2_8:2}#egg_1:1, egg_2:2}#random.choice([1, 2])
     if not gold:
-        chickens[chicken_num]=[ty, pos, ty2[ty], randpos()]
+        chickens[chicken_num]=[ty, pos, ty2[ty], randpos(), get_if(gen_ac, chicken_hats, empty)]
     else:
         ty=random.choice([chicken_gold_1, chicken_gold_2])
-        chickens[chicken_num]=[ty, pos, 3, randpos()]#{chicken_gold_1:1, chicken_gold_2:2}[t]
+        chickens[chicken_num]=[ty, pos, 3, randpos(), get_if(gen_ac, chicken_hats, empty)]#{chicken_gold_1:1, chicken_gold_2:2}[t]
     chicken_num+=1
     #ad={1:}#chicken_gold_1:3, chicken_gold_2:3, chicken_1_1:1, chicken_1_2:1, chicken_2_1:2, chicken_2_2:2, chicken_1_3:1, chicken_1_4:2, chicken_2_3:2, chicken_2_4:2, chicken_1_5:1, chicken_1_6:1, chicken_1_7:1, chicken_1_8:1, chicken_2_5:2, chicken_2_6:2, chicken_2_7:2, chicken_2_8:2}#{1:'got'}
     ad2={1:'Normal Chicken!', 2:'Brown Chicken!', 3:'Golden Chicken!'}
@@ -366,12 +376,16 @@ def new_chicken(gold=False):
 
 #show all chickens
 def show_chickens():
-    global chickens
+    global chickens, show_ac
     for egg in chickens:
         try:
             c=chickens[egg][0].get_rect()
             c.center=chickens[egg][1]
             screen.blit(chickens[egg][0], c)#chickens[egg][1])
+            if show_ac:
+                ca=chickens[egg][4].get_rect()
+                ca.center=(chickens[egg][1][0], chickens[egg][1][1]-40)
+                screen.blit(chickens[egg][4], ca)
         except:
             pass
 
@@ -396,7 +410,7 @@ egg_timer=0
 rel_egg_timer=0
 prev_time=0
 def animate_eggs():
-    global chickens, prev_time, chicken_num, eggs, egg_timer, rel_egg_timer, chicken_gold_1, chicken_gold_2, chicken_1_1, chicken_2_1, chicken_2_2, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8#, egg_crack_1_1, egg_crack_1_2, egg_crack_2_1, egg_crack_2_2
+    global chickens, prev_time, gen_ac, chicken_hats, empty, chicken_num, eggs, egg_timer, rel_egg_timer, chicken_gold_1, chicken_gold_2, chicken_1_1, chicken_2_1, chicken_2_2, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8#, egg_crack_1_1, egg_crack_1_2, egg_crack_2_1, egg_crack_2_2
     egg_timer+=1
     rel_egg_timer=round(egg_timer/15)
     if rel_egg_timer>5-1:
@@ -417,12 +431,12 @@ def animate_eggs():
                     th=random.choice([chicken_1_1, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8])
                     l1=[chicken_1_1, chicken_1_3, chicken_1_5, chicken_1_7]
                     l2=[chicken_2_2, chicken_2_4, chicken_2_6, chicken_2_8]
-                    chickens[chicken_num]=[th, list(save[1]), if_not_2(th, l1, l2, 1, 2), randpos()]#[th, list(save[1]), save[2], randpos()]
+                    chickens[chicken_num]=[th, list(save[1]), if_not_2(th, l1, l2, 1, 2), randpos(), get_if(gen_ac, chicken_hats, empty)]#[th, list(save[1]), save[2], randpos()]
                 elif save[2]==2:# or save[2]==4:
                     th=random.choice([chicken_2_1, chicken_2_2, chicken_2_3, chicken_2_4, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8])
                     l1=[chicken_1_1, chicken_1_3, chicken_1_5, chicken_1_7]
                     l2=[chicken_2_2, chicken_2_4, chicken_2_6, chicken_2_8]
-                    chickens[chicken_num]=[th, list(save[1]), if_not_2(th, l1, l2, 1, 2), randpos()]
+                    chickens[chicken_num]=[th, list(save[1]), if_not_2(th, l1, l2, 1, 2), randpos(), get_if(gen_ac, chicken_hats, empty)]
                 else:#if save[2]==3:
                     th=random.choice([chicken_gold_1, chicken_gold_2])#random.choice([chicken_1_1, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_gold_1, chicken_2_1, chicken_2_2, chicken_2_3, chicken_2_4, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_gold_2])
                     #l1=[chicken_1_1, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8]
@@ -430,7 +444,7 @@ def animate_eggs():
                     #l3={chicken_gold_1:3, chicken_gold_2:4}
                     #l1=[chicken_gold_1]
                     #l2=[chicken_gold_2]
-                    chickens[chicken_num]=[th, list(save[1]), 3, randpos()]#if_not(th, l1, l2, 1, 2, l3, 1)
+                    chickens[chicken_num]=[th, list(save[1]), 3, randpos(), get_if(gen_ac, chicken_hats, empty)]#if_not(th, l1, l2, 1, 2, l3, 1)
                 chicken_num+=1
         except:# Exception as er:
             pass#print (sys.exc_info())#er)
@@ -520,9 +534,12 @@ event_text=''
 inad=False
 insettings=False
 
+#settings
 controls=[pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_e, pygame.K_q]
-used_keys=[pygame.K_ESCAPE, pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v]
+used_keys=[pygame.K_ESCAPE, pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v, pygame.K_b, pygame.K_n]
 free_bind=False
+show_ac=False#True
+gen_ac=False#True
 
 start_image=pygame.image.load('art/start.png')
 start_image_pos=start_image.get_rect()
@@ -783,6 +800,12 @@ while on:
                     avatar+=1
                     if avatar==5:
                         avatar=1
+                    cooldown=10
+                if press[pygame.K_b]:
+                    show_ac=not show_ac
+                    cooldown=10
+                if press[pygame.K_n]:
+                    gen_ac=not gen_ac
                     cooldown=10
             if press[pygame.K_c]:
                 event_text=random.choice(['got a meme!', 'Yay! you unlocked a meme channel!', '[incert text here]', 'this is text'])
