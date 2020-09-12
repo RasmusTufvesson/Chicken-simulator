@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 #import sys
 
 def di(inp: dict):
@@ -30,11 +31,18 @@ screen=pygame.display.set_mode((dis_x, dis_y))
 pygame.display.set_caption('Chicken-Simulator')
 pygame.display.set_icon(pygame.image.load('art/icon.png'))
 
+#setting up pygame things
 clock=pygame.time.Clock()
+pygame.mixer.pre_init(frequency=44100, size=-16, channels=1, buffer=300)
+pygame.mixer.init()
 
 #load everything that does not fit into any special group
 textbox=pygame.image.load('art/textbox.png')
 empty=pygame.image.load('art/empty.png')
+
+#load sounds
+crack_sound=pygame.mixer.Sound('sound/crack.wav')
+chicken_sound=pygame.mixer.Sound('sound/chicken.wav')
 
 #load chicken hats n' stuff
 chicken_hats=(pygame.image.load('art/chick_wiz.png'), pygame.image.load('art/chick_hat.png'), pygame.image.load('art/chick_hat_2.png'), pygame.image.load('art/chick_tophat.png'))
@@ -317,7 +325,7 @@ def pickup_egg(pos):
 
 #crack an egg
 def crack_egg(pos):
-    global eggs, egg_crack_1, egg_crack_2, egg_crack_gold
+    global eggs, use_sound, crack_sound, egg_crack_1, egg_crack_2, egg_crack_gold
     rad=inside_egg_radius(get_mid_player(pos))
     if rad[0]:
         if eggs[rad[1]][2]==1:
@@ -326,6 +334,8 @@ def crack_egg(pos):
             eggs[rad[1]][3]=egg_crack_2
         else:
             eggs[rad[1]][3]=egg_crack_gold
+        if use_sound:
+            crack_sound.play()
         #holding=(True, eggs[rad[1]])
         #del eggs[rad[1]]
         #egg_num-=1
@@ -343,8 +353,8 @@ def get_if(i, out1, out2):
 
 #create a new random chicken
 chicken_num=0
-def new_chicken(gold=False):
-    global dis_x, dis_y, gen_ac, empty, chicken_hats, achivements, chickens, chicken_gold_1, chicken_gold_2, chicken_1_1, chicken_1_2, chicken_2_1, chicken_2_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_2_3, chicken_2_4, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_num
+def new_chicken(gold=False, load=False):
+    global dis_x, dis_y, use_sound, chicken_sound, gen_ac, empty, chicken_hats, achivements, chickens, chicken_gold_1, chicken_gold_2, chicken_1_1, chicken_1_2, chicken_2_1, chicken_2_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_2_3, chicken_2_4, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_num
     pos=[random.randint(0, dis_x), random.randint(0, dis_y)]
     ty=random.choice([chicken_1_1, chicken_2_1, chicken_2_2, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_2_3, chicken_2_4])
     ty2={chicken_gold_1:3, chicken_gold_2:3, chicken_1_1:1, chicken_1_2:2, chicken_2_1:1, chicken_2_2:2, chicken_1_3:1, chicken_1_4:2, chicken_2_3:1, chicken_2_4:2, chicken_1_5:1, chicken_1_6:2, chicken_1_7:1, chicken_1_8:2, chicken_2_5:1, chicken_2_6:2, chicken_2_7:1, chicken_2_8:2}#egg_1:1, egg_2:2}#random.choice([1, 2])
@@ -368,6 +378,8 @@ def new_chicken(gold=False):
             advance(ad2[ty2[ty]])#ad2[ad[ty]])
         else:
             advance('Golden Chicken!')
+    if use_sound and not load:
+        chicken_sound.play()
     #else:
     #    print (ad2[ty2[ty]])#ad[ty]])
     #    print (ad2[ad[ty]])
@@ -446,6 +458,7 @@ def animate_eggs():
                     #l2=[chicken_gold_2]
                     chickens[chicken_num]=[th, list(save[1]), 3, randpos(), get_if(gen_ac, chicken_hats, empty)]#if_not(th, l1, l2, 1, 2, l3, 1)
                 chicken_num+=1
+                #crack_sound.play()#pygame.mixer.Sound.play(crack_sound)
         except:# Exception as er:
             pass#print (sys.exc_info())#er)
     prev_time=rel_egg_timer
@@ -502,6 +515,53 @@ def wait_for_key():
 def key_name(key):
     return pygame.key.name(key)
 
+vol=10
+def volume(new):
+    global crack_sound, chicken_sound, vol
+    new=float(new)
+    crack_sound.set_volume(new)
+    chicken_sound.set_volume(new/2)
+    vol=new*10
+
+def warning(text):
+    global font, black, dis_x, dis_y
+    t=font.render(text, False, black)
+    p=t.get_rect()
+    p.center=(dis_x//2, dis_y//2)
+    screen.blit(t, p)
+    pygame.display.update()
+    time.sleep(3)
+
+def get_num(cent):
+    global textbox
+    re=pygame.K_RETURN
+    val_keys=[pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9]
+    t=font.render('Waiting...', False, black)
+    p=t.get_rect()
+    p.center=cent#o[0].center
+    p2=textbox.get_rect()
+    p2.center=cent
+    screen.blit(textbox, p2)
+    screen.blit(t, p)
+    pygame.display.update()
+    num=''
+    k=None
+    while k!=re:
+        k=wait_for_key()
+        if k==re:
+            break
+        elif k in val_keys:
+            num+=key_name(k)
+            t=font.render(num, False, black)
+            p=t.get_rect()
+            p.center=cent#o[0].center
+            p2=textbox.get_rect()
+            p2.center=cent
+            screen.blit(textbox, p2)
+            screen.blit(t, p)
+            pygame.display.update()
+    return num
+
 """
 step=0
 rel_step=0
@@ -522,6 +582,14 @@ def animate():
 #    global pos
 #    
 
+def set_dev():
+    global dev_mode, used_keys
+    dev_mode=not dev_mode
+    if dev_mode:
+        used_keys=[pygame.K_ESCAPE, pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v, pygame.K_b, pygame.K_n]
+    else:
+        used_keys=[pygame.K_ESCAPE]
+
 cooldown=0
 eggdown=random.randint(1, 1000)
 shopdown=0
@@ -533,13 +601,19 @@ inshot=False
 event_text=''
 inad=False
 insettings=False
+setmove=False
+setgen=False
 
 #settings
 controls=[pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_e, pygame.K_q]
-used_keys=[pygame.K_ESCAPE, pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v, pygame.K_b, pygame.K_n]
+used_keys=[pygame.K_ESCAPE]#, pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v, pygame.K_b, pygame.K_n]
 free_bind=False
 show_ac=False#True
 gen_ac=False#True
+#chicken_sound.set_volume(0.5)
+text_size=20
+use_sound=True
+dev_mode=False
 
 start_image=pygame.image.load('art/start.png')
 start_image_pos=start_image.get_rect()
@@ -660,66 +734,179 @@ while on:
                         #add to y poition
                         po[1]+=80
             elif insettings:
-                for_text=font.render('Forward: '+key_name(controls[0]), False, black)
-                back_text=font.render('Backward: '+key_name(controls[2]), False, black)
-                ri_text=font.render('Right: '+key_name(controls[3]), False, black)
-                le_text=font.render('Left: '+key_name(controls[1]), False, black)
-                in_text=font.render('Pickup: '+key_name(controls[4]), False, black)
-                cr_text=font.render('Crack: '+key_name(controls[5]), False, black)
-                tftof={True:'On', False:'Off'}
-                du_text=font.render('Free bind: '+tftof[free_bind], False, black)
-                con=[for_text, back_text, ri_text, le_text, in_text, cr_text]
-                li={}
-                po=[dis_x//2, 40]
-                for t in con:
-                    #make text position
-                    r=t.get_rect()
+                if setmove:
+                    for_text=font.render('Forward: '+key_name(controls[0]), False, black)
+                    back_text=font.render('Backward: '+key_name(controls[2]), False, black)
+                    ri_text=font.render('Right: '+key_name(controls[3]), False, black)
+                    le_text=font.render('Left: '+key_name(controls[1]), False, black)
+                    in_text=font.render('Pickup: '+key_name(controls[4]), False, black)
+                    cr_text=font.render('Crack: '+key_name(controls[5]), False, black)
+                    tftof={True:'On', False:'Off'}
+                    du_text=font.render('Free bind: '+tftof[free_bind], False, black)
+                    con=[for_text, back_text, ri_text, le_text, in_text, cr_text]
+                    li={}
+                    po=[dis_x//2, 40]
+                    for t in con:
+                        #make text position
+                        r=t.get_rect()
+                        r.center=tuple(po)
+                        r2=textbox.get_rect()
+                        r2.center=r.center
+                        #print (type(li))
+                        li[len(li)]=r2, tuple(po)
+                        #print (type(li))
+                        #draw control
+                        screen.blit(textbox, r2)
+                        screen.blit(t, r)
+                        #add to y poition
+                        po[1]+=80
+                    r=du_text.get_rect()
                     r.center=tuple(po)
-                    r2=textbox.get_rect()
-                    r2.center=r.center
-                    #print (type(li))
-                    li[len(li)]=r2, tuple(po)
-                    #print (type(li))
-                    #draw control
-                    screen.blit(textbox, r2)
-                    screen.blit(t, r)
-                    #add to y poition
-                    po[1]+=80
-                r=du_text.get_rect()
-                r.center=tuple(po)
-                du_box=textbox.get_rect()
-                du_box.center=r.center
-                screen.blit(textbox, du_box)
-                screen.blit(du_text, r)
-                if pygame.mouse.get_pressed()[0]:
-                    poo=pygame.mouse.get_pos()
-                    do=True
-                    if cooldown<=0:
-                        if du_box.collidepoint(*poo):
-                            do=False
-                            cooldown=5
-                            free_bind=not free_bind
-                    else:
-                        cooldown-=1
-                    if do:
-                        rel_con={0:0, 1:2, 2:3, 3:1, 4:4, 5:5}
-                        for c in li:
-                            if li[c][0].collidepoint(*poo):
-                                t=font.render('Waiting...', False, black)
-                                p=t.get_rect()
-                                p.center=li[c][1]
-                                p2=textbox.get_rect()
-                                p2.center=p.center
-                                screen.blit(textbox, p2)
-                                screen.blit(t, p)
-                                pygame.display.update()
-                                k=wait_for_key()
-                                if not free_bind:
-                                    if k not in used_keys and k not in controls:
+                    du_box=textbox.get_rect()
+                    du_box.center=r.center
+                    screen.blit(textbox, du_box)
+                    screen.blit(du_text, r)
+                    if pygame.mouse.get_pressed()[0]:
+                        poo=pygame.mouse.get_pos()
+                        do=True
+                        if cooldown<=0:
+                            if du_box.collidepoint(*poo):
+                                do=False
+                                cooldown=5
+                                free_bind=not free_bind
+                        #else:
+                        #    cooldown-=1
+                        if do:
+                            rel_con={0:0, 1:2, 2:3, 3:1, 4:4, 5:5}
+                            for c in li:
+                                if li[c][0].collidepoint(*poo):
+                                    t=font.render('Waiting...', False, black)
+                                    p=t.get_rect()
+                                    p.center=li[c][1]
+                                    p2=textbox.get_rect()
+                                    p2.center=p.center
+                                    screen.blit(textbox, p2)
+                                    screen.blit(t, p)
+                                    pygame.display.update()
+                                    k=wait_for_key()
+                                    if not free_bind:
+                                        if k not in used_keys and k not in controls:
+                                            controls[rel_con[c]]=k
+                                    else:
                                         controls[rel_con[c]]=k
+                elif setgen:
+                    #vo_text=font.render('Volume: '+str(int(vol)), False, black)
+                    ts_text=font.render('Text size: '+str(text_size), False, black)
+                    oof={True:'on', False:'off'}
+                    sa_text=font.render('Show accessories: '+oof[show_ac], False, black)
+                    so_text=font.render('Sound: '+oof[use_sound], False, black)
+                    dm_text=font.render('Developer mode: '+oof[dev_mode], False, black)
+                    op=(ts_text, sa_text, so_text, dm_text)#tuple([])#(vo_text,)
+                    l=[]
+                    po=[(dis_x//2)-170, dis_y//4]
+                    dow=((dis_x//2)-170)+340+340
+                    st=(dis_x//2)-170
+                    thi=0
+                    for t in op:
+                        if po[0]==dow:
+                            po[0]=st
+                            po[1]+=80
+                        r=t.get_rect()
+                        r.center=tuple(po)
+                        r2=textbox.get_rect()
+                        r2.center=r.center
+                        screen.blit(textbox, r2)
+                        screen.blit(t, r)
+                        po[0]+=340
+                        l.append([r2, thi])
+                        thi+=1
+                    #tts={0:setmo}
+                    if pygame.mouse.get_pressed()[0]:
+                        mo=pygame.mouse.get_pos()
+                        for o in l:
+                            if o[0].collidepoint(mo):
+                                if o[1]==0:
+                                    num=get_num(o[0].center)
+                                    if num!='':
+                                        if int(num)<=25:
+                                            font=pygame.font.Font('freesansbold.ttf', int(num))
+                                            text_size=int(num)
+                                        else:
+                                            warning('The max size of text is 25')
+                                elif o[1]==1:
+                                    if cooldown<=0:
+                                        show_ac=not show_ac
+                                        cooldown=10
+                                elif o[1]==2:
+                                    if cooldown<=0:
+                                        use_sound=not use_sound
+                                        cooldown=10
+                                elif o[1]==3:
+                                    if cooldown<=0:
+                                        set_dev()
+                                        cooldown=10
+##                                if o[1]==0:
+##                                    re=pygame.K_RETURN
+##                                    val_keys=[pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9]
+##                                    t=font.render('Waiting...', False, black)
+##                                    p=t.get_rect()
+##                                    p.center=o[0].center
+##                                    screen.blit(textbox, o[0])
+##                                    screen.blit(t, p)
+##                                    pygame.display.update()
+##                                    num=''
+##                                    k=None
+##                                    while k!=re:
+##                                        k=wait_for_key()
+##                                        if k==re:
+##                                            break
+##                                        elif k in val_keys:
+##                                            num+=key_name(k)
+##                                            t=font.render(num, False, black)
+##                                            p=t.get_rect()
+##                                            p.center=o[0].center
+##                                            screen.blit(textbox, o[0])
+##                                            screen.blit(t, p)
+##                                            pygame.display.update()
+##                                    if num!='':
+##                                        if int(num)<=100.0:
+##                                            volume(int(num)/10)
+##                                        else:
+##                                            warning('The max volume is 100')
+                else:
+                    mo_text=font.render('Controls', False, black)
+                    ge_text=font.render('General', False, black)
+                    #te_text=font.render('test', False, black)
+                    op=(mo_text, ge_text)#, te_text)
+                    #320x60
+                    l=[]
+                    po=[(dis_x//2)-170, dis_y//4]
+                    dow=((dis_x//2)-170)+340+340
+                    st=(dis_x//2)-170
+                    thi=0
+                    for t in op:
+                        if po[0]==dow:
+                            po[0]=st
+                            po[1]+=80
+                        r=t.get_rect()
+                        r.center=tuple(po)
+                        r2=textbox.get_rect()
+                        r2.center=r.center
+                        screen.blit(textbox, r2)
+                        screen.blit(t, r)
+                        po[0]+=340
+                        l.append([r2, thi])
+                        thi+=1
+                    #tts={0:setmo}
+                    if pygame.mouse.get_pressed()[0]:
+                        mo=pygame.mouse.get_pos()
+                        for o in l:
+                            if o[0].collidepoint(mo):
+                                if o[1]==0:
+                                    setmove=True
                                 else:
-                                    controls[rel_con[c]]=k
-                                    #print (c)
+                                    setgen=True
+                                    cooldown=10
             else:
                 exit_box=textbox
                 box_pos=exit_box.get_rect()#pygame.Rect((dis_x//2)-160, (dis_y//2)-30, (dis_x//2)+160, (dis_y//2)+30)
@@ -760,6 +947,8 @@ while on:
                     elif set_pos.collidepoint(*mouse):
                         insettings=True
                         inshop=False
+                        setmove=False
+                        setgen=False
                         cooldown=10
                 
             #draw cursor
@@ -781,14 +970,17 @@ while on:
                 inad=False
                 insettings=False
                 cooldown=10
-        else:
-            cooldown-=1
+        #else:
+        #    cooldown-=1
         if not inmenu:
             move(press)
-            if press[pygame.K_z]:
-                new_egg(None, True)
-            if press[pygame.K_x]:
-                new_chicken(random.choice([False, False, True]))
+            if dev_mode==True:
+                if press[pygame.K_z]:
+                    new_egg(None, True)
+                if press[pygame.K_x]:
+                    new_chicken(random.choice([False, False, True]))
+                if press[pygame.K_c]:
+                    event_text=random.choice(['got a meme!', 'Yay! you unlocked a meme channel!', '[incert text here]', 'this is text'])
             if cooldown<=0:
                 if press[controls[4]]:#pygame.K_e]:
                     pickup_egg(pos)
@@ -796,19 +988,18 @@ while on:
                 if press[controls[5]]:#pygame.K_q]:
                     crack_egg(pos)
                     cooldown=10
-                if press[pygame.K_v]:
-                    avatar+=1
-                    if avatar==5:
-                        avatar=1
-                    cooldown=10
-                if press[pygame.K_b]:
-                    show_ac=not show_ac
-                    cooldown=10
-                if press[pygame.K_n]:
-                    gen_ac=not gen_ac
-                    cooldown=10
-            if press[pygame.K_c]:
-                event_text=random.choice(['got a meme!', 'Yay! you unlocked a meme channel!', '[incert text here]', 'this is text'])
+                if dev_mode==True:
+                    if press[pygame.K_v]:
+                        avatar+=1
+                        if avatar==5:
+                            avatar=1
+                        cooldown=10
+                    if press[pygame.K_b]:
+                        show_ac=not show_ac
+                        cooldown=10
+                    if press[pygame.K_n]:
+                        gen_ac=not gen_ac
+                        cooldown=10
             if len(chickens)>0:
                 if eggdown<=0:
                     lay_egg(random.dict_choice(chickens))
@@ -842,10 +1033,11 @@ while on:
             if pygame.mouse.get_pressed()[0]:
                 if box_pos.collidepoint(*p):
                     on=False
-        else:
-            cooldown-=1
+        #else:
+        #    cooldown-=1
     #show_eggs()
     #update display and wait
+    cooldown-=1
     pygame.display.update()
     clock.tick(30)
 
