@@ -1,6 +1,7 @@
 import pygame
 import random
 import time
+from datetime import datetime
 #import sys
 
 def di(inp: dict):
@@ -45,7 +46,7 @@ crack_sound=pygame.mixer.Sound('sound/crack.wav')
 chicken_sound=pygame.mixer.Sound('sound/chicken.wav')
 
 #load chicken hats n' stuff
-chicken_hats=(pygame.image.load('art/chick_wiz.png'), pygame.image.load('art/chick_hat.png'), pygame.image.load('art/chick_hat_2.png'), pygame.image.load('art/chick_tophat.png'))
+chicken_hats=(pygame.image.load('art/chick_wiz.png'), pygame.image.load('art/chick_hat.png'), pygame.image.load('art/chick_hat_2.png'), pygame.image.load('art/chick_tophat.png'), pygame.image.load('art/chick_head.png'), pygame.image.load('art/chick_mu.png'), pygame.image.load('art/chick_tophat_2.png'))
 
 #load all the eggs
 egg_1=pygame.image.load('art/egg_light.png')
@@ -359,10 +360,10 @@ def new_chicken(gold=False, load=False):
     ty=random.choice([chicken_1_1, chicken_2_1, chicken_2_2, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_2_3, chicken_2_4])
     ty2={chicken_gold_1:3, chicken_gold_2:3, chicken_1_1:1, chicken_1_2:2, chicken_2_1:1, chicken_2_2:2, chicken_1_3:1, chicken_1_4:2, chicken_2_3:1, chicken_2_4:2, chicken_1_5:1, chicken_1_6:2, chicken_1_7:1, chicken_1_8:2, chicken_2_5:1, chicken_2_6:2, chicken_2_7:1, chicken_2_8:2}#egg_1:1, egg_2:2}#random.choice([1, 2])
     if not gold:
-        chickens[chicken_num]=[ty, pos, ty2[ty], randpos(), get_if(gen_ac, chicken_hats, empty)]
+        chickens[chicken_num]=[ty, pos, ty2[ty], randpos(), get_if(gen_ac, chicken_hats, empty), datetime.now()]
     else:
         ty=random.choice([chicken_gold_1, chicken_gold_2])
-        chickens[chicken_num]=[ty, pos, 3, randpos(), get_if(gen_ac, chicken_hats, empty)]#{chicken_gold_1:1, chicken_gold_2:2}[t]
+        chickens[chicken_num]=[ty, pos, 3, randpos(), get_if(gen_ac, chicken_hats, empty), datetime.now()]#{chicken_gold_1:1, chicken_gold_2:2}[t]
     chicken_num+=1
     #ad={1:}#chicken_gold_1:3, chicken_gold_2:3, chicken_1_1:1, chicken_1_2:1, chicken_2_1:2, chicken_2_2:2, chicken_1_3:1, chicken_1_4:2, chicken_2_3:2, chicken_2_4:2, chicken_1_5:1, chicken_1_6:1, chicken_1_7:1, chicken_1_8:1, chicken_2_5:2, chicken_2_6:2, chicken_2_7:2, chicken_2_8:2}#{1:'got'}
     ad2={1:'Normal Chicken!', 2:'Brown Chicken!', 3:'Golden Chicken!'}
@@ -388,7 +389,7 @@ def new_chicken(gold=False, load=False):
 
 #show all chickens
 def show_chickens():
-    global chickens, show_ac
+    global chickens, show_ac, show_time, font, black
     for egg in chickens:
         try:
             c=chickens[egg][0].get_rect()
@@ -396,9 +397,16 @@ def show_chickens():
             screen.blit(chickens[egg][0], c)#chickens[egg][1])
             if show_ac:
                 ca=chickens[egg][4].get_rect()
-                ca.center=(chickens[egg][1][0], chickens[egg][1][1]-40)
+                ca.center=(chickens[egg][1][0], chickens[egg][1][1]-30)
                 screen.blit(chickens[egg][4], ca)
-        except:
+            if show_time:
+                #print ('Yeah!')
+                n=datetime.now()-chickens[egg][5]
+                t=font.render(str(n.days)+'  '+str(n.seconds), False, black)
+                r=t.get_rect()
+                r.center=(chickens[egg][1][0], chickens[egg][1][1]+50)
+                screen.blit(t, r)
+        except Exception as er:
             pass
 
 #confusing function
@@ -443,12 +451,12 @@ def animate_eggs():
                     th=random.choice([chicken_1_1, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8])
                     l1=[chicken_1_1, chicken_1_3, chicken_1_5, chicken_1_7]
                     l2=[chicken_2_2, chicken_2_4, chicken_2_6, chicken_2_8]
-                    chickens[chicken_num]=[th, list(save[1]), if_not_2(th, l1, l2, 1, 2), randpos(), get_if(gen_ac, chicken_hats, empty)]#[th, list(save[1]), save[2], randpos()]
+                    chickens[chicken_num]=[th, list(save[1]), if_not_2(th, l1, l2, 1, 2), randpos(), get_if(gen_ac, chicken_hats, empty), datetime.now()]#[th, list(save[1]), save[2], randpos()]
                 elif save[2]==2:# or save[2]==4:
                     th=random.choice([chicken_2_1, chicken_2_2, chicken_2_3, chicken_2_4, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8])
                     l1=[chicken_1_1, chicken_1_3, chicken_1_5, chicken_1_7]
                     l2=[chicken_2_2, chicken_2_4, chicken_2_6, chicken_2_8]
-                    chickens[chicken_num]=[th, list(save[1]), if_not_2(th, l1, l2, 1, 2), randpos(), get_if(gen_ac, chicken_hats, empty)]
+                    chickens[chicken_num]=[th, list(save[1]), if_not_2(th, l1, l2, 1, 2), randpos(), get_if(gen_ac, chicken_hats, empty), datetime.now()]
                 else:#if save[2]==3:
                     th=random.choice([chicken_gold_1, chicken_gold_2])#random.choice([chicken_1_1, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8, chicken_gold_1, chicken_2_1, chicken_2_2, chicken_2_3, chicken_2_4, chicken_2_5, chicken_2_6, chicken_2_7, chicken_2_8, chicken_gold_2])
                     #l1=[chicken_1_1, chicken_1_2, chicken_1_3, chicken_1_4, chicken_1_5, chicken_1_6, chicken_1_7, chicken_1_8]
@@ -456,7 +464,7 @@ def animate_eggs():
                     #l3={chicken_gold_1:3, chicken_gold_2:4}
                     #l1=[chicken_gold_1]
                     #l2=[chicken_gold_2]
-                    chickens[chicken_num]=[th, list(save[1]), 3, randpos(), get_if(gen_ac, chicken_hats, empty)]#if_not(th, l1, l2, 1, 2, l3, 1)
+                    chickens[chicken_num]=[th, list(save[1]), 3, randpos(), get_if(gen_ac, chicken_hats, empty), datetime.now()]#if_not(th, l1, l2, 1, 2, l3, 1)
                 chicken_num+=1
                 #crack_sound.play()#pygame.mixer.Sound.play(crack_sound)
         except:# Exception as er:
@@ -614,6 +622,7 @@ gen_ac=False#True
 text_size=20
 use_sound=True
 dev_mode=False
+show_time=False
 
 start_image=pygame.image.load('art/start.png')
 start_image_pos=start_image.get_rect()
@@ -797,11 +806,12 @@ while on:
                 elif setgen:
                     #vo_text=font.render('Volume: '+str(int(vol)), False, black)
                     ts_text=font.render('Text size: '+str(text_size), False, black)
-                    oof={True:'on', False:'off'}
+                    oof={True:'On', False:'Off'}
                     sa_text=font.render('Show accessories: '+oof[show_ac], False, black)
                     so_text=font.render('Sound: '+oof[use_sound], False, black)
                     dm_text=font.render('Developer mode: '+oof[dev_mode], False, black)
-                    op=(ts_text, sa_text, so_text, dm_text)#tuple([])#(vo_text,)
+                    st_text=font.render('Show chicken lifetime: '+oof[show_time], False, black)
+                    op=(ts_text, sa_text, so_text, dm_text, st_text)#tuple([])#(vo_text,)
                     l=[]
                     po=[(dis_x//2)-170, dis_y//4]
                     dow=((dis_x//2)-170)+340+340
@@ -844,6 +854,10 @@ while on:
                                 elif o[1]==3:
                                     if cooldown<=0:
                                         set_dev()
+                                        cooldown=10
+                                elif o[1]==4:
+                                    if cooldown<=0:
+                                        show_time=not show_time
                                         cooldown=10
 ##                                if o[1]==0:
 ##                                    re=pygame.K_RETURN
