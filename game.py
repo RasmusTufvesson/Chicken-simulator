@@ -36,6 +36,10 @@ pygame.display.set_icon(pygame.image.load('art/icon.png'))
 clock=pygame.time.Clock()
 pygame.mixer.pre_init(frequency=44100, size=-16, channels=1, buffer=300)
 pygame.mixer.init()
+pygame.joystick.init()
+js=[pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
+for j in range(len(js)):
+    js[j].init()
 
 #load everything that does not fit into any special group
 textbox=pygame.image.load('art/textbox.png')
@@ -117,13 +121,13 @@ avatar=1
 def show_player():
     global pos
     p=player.get_rect()
-    p.center=(pos)
+    p.center=(round(pos[0]), round(pos[1]))
     screen.blit(player, p)
 
 #move the player
 dir_r=True
 def move(ev):
-    global dir_r, an_speed, controls, dis_x, dis_y, pos, speed, default_speed, player, player_1, player_2, chicken_1_7, chicken_1_8, chicken_2_7, chicken_2_8, chicken_gold_1, chicken_gold_2, animation, player_1_idle_egg_gold, player_2_idle_egg_gold, player_1_egg_gold, player_1_idle_egg_1, player_1_idle_egg_2, player_2_idle_egg_1, player_2_idle_egg_2, player_1_walk, player_2_walk, player_1_idle, player_2_idle, holding, player_1_egg_1, player_1_egg_2, player_2_egg_1, player_2_egg_2
+    global dir_r, js, an_speed, controls, dis_x, dis_y, pos, speed, default_speed, player, player_1, player_2, chicken_1_7, chicken_1_8, chicken_2_7, chicken_2_8, chicken_gold_1, chicken_gold_2, animation, player_1_idle_egg_gold, player_2_idle_egg_gold, player_1_egg_gold, player_1_idle_egg_1, player_1_idle_egg_2, player_2_idle_egg_1, player_2_idle_egg_2, player_1_walk, player_2_walk, player_1_idle, player_2_idle, holding, player_1_egg_1, player_1_egg_2, player_2_egg_1, player_2_egg_2
     #pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_e, pygame.K_q
     walk=True
     is_walk=False
@@ -165,6 +169,25 @@ def move(ev):
         walk=True
     elif not is_walk:
         walk=False
+    if not walk:
+        #print ('im in!')
+        if len(js)!=0:
+            for j in js:
+                h=j.get_hat(0)
+                #print ('got buttons')
+                if h[0]!=0 or h[1]!=0:
+                    #print ('passed')
+                    pos[0]+=h[0]*default_speed*speed
+                    pos[1]-=h[1]*default_speed*speed
+                    if h[0]!=0:
+                        if h[0]==1:
+                            dir_r=True
+                        else:
+                            dir_r=False
+                    walk=True
+                    break
+                #else:
+                    #print (h)
     #print (str((player, player_1)))#(player==player_1)
     if walk:
         if dir_r:#player==player_1:#animation==(player_1,):# or animation==player_1_walk:# or animation==player_1_idle:
@@ -569,6 +592,17 @@ def get_num(cent):
             screen.blit(t, p)
             pygame.display.update()
     return num
+
+def get_controller():
+    global js
+    con=[False for a in range(12)]
+    tfton={0:False, 1:True, '0':False, '1':True}
+    for j in js:
+        but=[tfton[j.get_button(b)] for b in range(j.get_numbuttons())]
+        if but!=con:
+            con=but
+            break
+    return con
 
 """
 step=0
@@ -977,8 +1011,9 @@ while on:
             #b)
         #if not inmenu:
         press=pygame.key.get_pressed()
+        controller=get_controller()
         if cooldown<=0:
-            if press[pygame.K_ESCAPE]:
+            if press[pygame.K_ESCAPE] or controller[9]:
                 inmenu=not inmenu
                 inshop=False
                 inad=False
@@ -989,29 +1024,29 @@ while on:
         if not inmenu:
             move(press)
             if dev_mode==True:
-                if press[pygame.K_z]:
+                if press[pygame.K_z] or controller[7]:
                     new_egg(None, True)
-                if press[pygame.K_x]:
+                if press[pygame.K_x] or controller[6]:
                     new_chicken(random.choice([False, False, True]))
-                if press[pygame.K_c]:
+                if press[pygame.K_c] or controller[3]:
                     event_text=random.choice(['got a meme!', 'Yay! you unlocked a meme channel!', '[incert text here]', 'this is text'])
             if cooldown<=0:
-                if press[controls[4]]:#pygame.K_e]:
+                if press[controls[4]] or controller[1]:#pygame.K_e]:
                     pickup_egg(pos)
                     cooldown=10
-                if press[controls[5]]:#pygame.K_q]:
+                if press[controls[5]] or controller[0]:#pygame.K_q]:
                     crack_egg(pos)
                     cooldown=10
                 if dev_mode==True:
-                    if press[pygame.K_v]:
+                    if press[pygame.K_v] or controller[2]:
                         avatar+=1
                         if avatar==5:
                             avatar=1
                         cooldown=10
-                    if press[pygame.K_b]:
+                    if press[pygame.K_b] or controller[4]:
                         show_ac=not show_ac
                         cooldown=10
-                    if press[pygame.K_n]:
+                    if press[pygame.K_n] or controller[5]:
                         gen_ac=not gen_ac
                         cooldown=10
             if len(chickens)>0:

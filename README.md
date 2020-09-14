@@ -11,19 +11,19 @@ The game is made in python using pygame
 
 Controls:
 
-esc - menu
+esc / start - menu
 
-wasd - movment
+wasd / d-pad - movment
 
-e - pickup egg
-q - crack egg
+e / a - pickup egg
+q / x - crack egg
 
-z - spawn eggs
-x - spawn chickens
-c - show random text
-v - change avatar
-b - on/off show accessories
-n - on/off generate accessories
+z / RT - spawn eggs
+x / LT - spawn chickens
+c / y - show random text
+v / b - change avatar
+b / LB - on/off show accessories
+n / RB - on/off generate accessories
 
 
 Python needs:
