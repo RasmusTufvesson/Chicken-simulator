@@ -1237,7 +1237,7 @@ while on:
                     crack_egg(pos)
                     cooldown=10
                 if dev_mode==True:
-                    if press[pygame.K_v] or controller[2]:
+                    if press[pygame.K_v] or controller[8]:
                         avatar+=1
                         if avatar==5:
                             avatar=1
