@@ -9,7 +9,7 @@ The game is made in python using pygame
 
 
 
-Controls:
+Controls(changable in settings menu):
 
 esc / start - menu
 
