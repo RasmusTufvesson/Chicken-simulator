@@ -693,8 +693,8 @@ show_time=False
 cont_controls=[1, 0, 2]
 used_buttons=[9]
 use_con=False
-mouse_fix=True
-mouse_fix_time=10
+mouse_fix=False
+mouse_fix_time=50
 
 start_image=pygame.image.load('art/start.png')
 start_image_pos=start_image.get_rect()
