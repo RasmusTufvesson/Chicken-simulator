@@ -15,6 +15,9 @@ esc / start - menu
 
 wasd / d-pad - movment
 
+mouse / right stick - menu movment
+none / b - return to menu center
+
 e / a - pickup egg
 q / x - crack egg
 
