@@ -604,6 +604,32 @@ def get_controller():
             break
     return con
 
+def wait_for_con(wait=True, use_nums=True):
+    global on
+    key=False
+    defa=[False for a in range(12)]
+    while not key:
+        for ev in pygame.event.get():
+            if ev.type==pygame.QUIT:
+                on=False
+                key=True
+        con=get_controller()
+        if con!=defa:
+            if use_nums:
+                return get_nums(con)
+            else:
+                return con
+        if not wait:
+            key=True
+    return defa
+
+def get_nums(l):
+    nums=[]
+    for a in range(len(l)):
+        if l[a]:
+            nums.append(a)
+    return nums
+
 """
 step=0
 rel_step=0
@@ -625,11 +651,13 @@ def animate():
 #    
 
 def set_dev():
-    global dev_mode, used_keys
+    global dev_mode, used_keys, used_buttons
     dev_mode=not dev_mode
     if dev_mode:
+        used_buttons=[7, 6, 3, 8, 4, 5, 9]
         used_keys=[pygame.K_ESCAPE, pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v, pygame.K_b, pygame.K_n]
     else:
+        used_buttons=[9]#[7, 6, 3, 2, 4, 5, 9]
         used_keys=[pygame.K_ESCAPE]
 
 cooldown=0
@@ -645,6 +673,11 @@ inad=False
 insettings=False
 setmove=False
 setgen=False
+setcon=False
+button_names={0: 'x', 1: 'a', 2: 'b', 3: 'y', 4: 'LB', 5: 'RB', 6: 'LT', 7: 'RT', 8: 'back', 9: 'start', 10: 'LS', 11: 'RS'}
+con_pos=[dis_x//2, dis_y//2]
+before_con_pos=(0, 0)
+con_fix_timer=10
 
 #settings
 controls=[pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_e, pygame.K_q]
@@ -657,6 +690,11 @@ text_size=20
 use_sound=True
 dev_mode=False
 show_time=False
+cont_controls=[1, 0, 2]
+used_buttons=[9]
+use_con=False
+mouse_fix=True
+mouse_fix_time=10
 
 start_image=pygame.image.load('art/start.png')
 start_image_pos=start_image.get_rect()
@@ -696,6 +734,68 @@ set_post=set_text.get_rect()
 set_post.center=(dis_x//2, dis_y-((dis_y//4)//2))
 set_pos=textbox.get_rect()
 set_pos.center=set_post.center
+
+#pygame function replacements
+def get_mouse():
+    global use_con, con_pos
+    if use_con:
+        return con_pos
+    else:
+        return pygame.mouse.get_pos()
+
+def get_click():
+    global use_con, cont_controls
+    if use_con:
+        return wait_for_con(False, False)[cont_controls[0]]
+    else:
+        return pygame.mouse.get_pressed()[0]
+
+def con_mouse():#pos1, pos2):
+    global con_pos, js, default_speed, mouse_fix, before_con_pos
+    if len(js)!=0:
+        for j in js:
+            h=(round_float(j.get_axis(2)), round_float(j.get_axis(3)))#.get_hat(0)
+            #print ('got buttons')
+            if h[0]!=0 or h[1]!=0:
+                #print ('passed')
+                #print (type(con_pos))
+                do=True
+                if mouse_fix:
+                    if not mouse_move_check(h):
+                        do=False
+                if do:
+                    con_pos[0]+=h[0]*default_speed*2
+                    con_pos[1]+=h[1]*default_speed*2
+                    before_con_pos=h
+                    break
+
+def mouse_move_check(h):
+    global before_con_pos, con_fix_timer, mouse_fix_time
+    if con_fix_timer>0:
+        con_fix_timer-=1
+        return True#before_con_pos!=h
+    else:
+        if before_con_pos!=h:
+            con_fix_timer=mouse_fix_time
+            return True
+        else:
+            return False
+        #return before_con_pos!=h
+    #t=False
+    #for event in pygame.event.get():
+    #    if event.type==pygame.JOYBALLMOTION
+    #        t=True
+    #        break
+    #return t
+
+def round_float(f):
+    return float('{:>6.3f}'.format(f))
+
+def round_tuple(t):
+    r=[]
+    for item in t:
+        r.append(round(item))
+    return tuple(r)
 
 #mainloop
 on=True
@@ -743,8 +843,8 @@ while on:
                     screen.blit(chi_text, chi_pos)
                     #check if player bought anything
                     if shopdown<=0:
-                        if pygame.mouse.get_pressed()[0]:
-                            mouse=pygame.mouse.get_pos()
+                        if get_click():#pygame.mouse.get_pressed()[0]:
+                            mouse=get_mouse()#pygame.mouse.get_pos()
                             if pro_pos.collidepoint(*mouse):
                                 if money>=5:
                                     money-=5
@@ -809,8 +909,8 @@ while on:
                     du_box.center=r.center
                     screen.blit(textbox, du_box)
                     screen.blit(du_text, r)
-                    if pygame.mouse.get_pressed()[0]:
-                        poo=pygame.mouse.get_pos()
+                    if get_click():#pygame.mouse.get_pressed()[0]:
+                        poo=get_mouse()#pygame.mouse.get_pos()
                         do=True
                         if cooldown<=0:
                             if du_box.collidepoint(*poo):
@@ -865,8 +965,8 @@ while on:
                         l.append([r2, thi])
                         thi+=1
                     #tts={0:setmo}
-                    if pygame.mouse.get_pressed()[0]:
-                        mo=pygame.mouse.get_pos()
+                    if get_click():#pygame.mouse.get_pressed()[0]:
+                        mo=get_mouse()#pygame.mouse.get_pos()
                         for o in l:
                             if o[0].collidepoint(mo):
                                 if o[1]==0:
@@ -921,11 +1021,101 @@ while on:
 ##                                            volume(int(num)/10)
 ##                                        else:
 ##                                            warning('The max volume is 100')
+                elif setcon:
+                    in_text=font.render('Pickup/Interact: '+button_names[cont_controls[0]], False, black)
+                    cr_text=font.render('Crack: '+button_names[cont_controls[1]], False, black)
+                    mc_text=font.render('Return to center(menu): '+button_names[cont_controls[2]], False, black)
+                    tftof={True:'On', False:'Off'}
+                    mf_text=font.render('Mouse fix: '+tftof[mouse_fix], False, black)
+                    mt_text=font.render('Mouse fix time: '+str(mouse_fix_time), False, black)
+                    du_text=font.render('Free bind: '+tftof[free_bind], False, black)
+                    con=[in_text, cr_text, mc_text]
+                    li={}
+                    po=[dis_x//2, 40]
+                    for t in con:
+                        #make text position
+                        r=t.get_rect()
+                        r.center=tuple(po)
+                        r2=textbox.get_rect()
+                        r2.center=r.center
+                        #print (type(li))
+                        li[len(li)]=r2, tuple(po)
+                        #print (type(li))
+                        #draw control
+                        screen.blit(textbox, r2)
+                        screen.blit(t, r)
+                        #add to y poition
+                        po[1]+=80
+                    r=mf_text.get_rect()
+                    r.center=tuple(po)
+                    mf_box=textbox.get_rect()
+                    mf_box.center=r.center
+                    screen.blit(textbox, mf_box)
+                    screen.blit(mf_text, r)
+                    po[1]+=80
+                    r=mt_text.get_rect()
+                    r.center=tuple(po)
+                    mt_box=textbox.get_rect()
+                    mt_box.center=r.center
+                    if mouse_fix:
+                        screen.blit(textbox, mt_box)
+                        screen.blit(mt_text, r)
+                        po[1]+=80
+                    r=du_text.get_rect()
+                    r.center=tuple(po)
+                    du_box=textbox.get_rect()
+                    du_box.center=r.center
+                    screen.blit(textbox, du_box)
+                    screen.blit(du_text, r)
+                    if get_click():#pygame.mouse.get_pressed()[0]:
+                        poo=get_mouse()#pygame.mouse.get_pos()
+                        do=True
+                        if cooldown<=0:
+                            if du_box.collidepoint(*poo):
+                                do=False
+                                cooldown=5
+                                free_bind=not free_bind
+                            elif mf_box.collidepoint(*poo):
+                                do=False
+                                cooldown=5
+                                mouse_fix=not mouse_fix
+                            elif mt_box.collidepoint(*poo):
+                                num=get_num(mt_box.center)
+                                if num!='':
+                                    if int(num)<=500:
+                                        #font=pygame.font.Font('freesansbold.ttf', int(num))
+                                        #text_size=int(num)
+                                        mouse_fix_time=int(num)
+                                    else:
+                                        warning('The max fix timer time is 500')
+                        #else:
+                        #    cooldown-=1
+                        if do:
+                            #rel_con={0:0, 1:2, 2:3, 3:1, 4:4, 5:5}
+                            for c in li:
+                                if li[c][0].collidepoint(*poo):
+                                    t=font.render('Waiting...', False, black)
+                                    p=t.get_rect()
+                                    p.center=li[c][1]
+                                    p2=textbox.get_rect()
+                                    p2.center=p.center
+                                    screen.blit(textbox, p2)
+                                    screen.blit(t, p)
+                                    pygame.display.update()
+                                    if use_con:
+                                        time.sleep(0.5)
+                                    k=wait_for_con()[0]
+                                    if not free_bind:
+                                        if k not in used_buttons and k not in cont_controls:
+                                            cont_controls[c]=k
+                                    else:
+                                        cont_controls[c]=k
                 else:
-                    mo_text=font.render('Controls', False, black)
+                    mo_text=font.render('Keyboard', False, black)
                     ge_text=font.render('General', False, black)
+                    co_text=font.render('Controller', False, black)
                     #te_text=font.render('test', False, black)
-                    op=(mo_text, ge_text)#, te_text)
+                    op=(mo_text, ge_text, co_text)#, te_text)
                     #320x60
                     l=[]
                     po=[(dis_x//2)-170, dis_y//4]
@@ -946,15 +1136,17 @@ while on:
                         l.append([r2, thi])
                         thi+=1
                     #tts={0:setmo}
-                    if pygame.mouse.get_pressed()[0]:
-                        mo=pygame.mouse.get_pos()
+                    if get_click():#pygame.mouse.get_pressed()[0]:
+                        mo=get_mouse()#pygame.mouse.get_pos()
                         for o in l:
                             if o[0].collidepoint(mo):
                                 if o[1]==0:
                                     setmove=True
-                                else:
+                                elif o[1]==1:
                                     setgen=True
                                     cooldown=10
+                                elif o[1]==2:
+                                    setcon=True
             else:
                 exit_box=textbox
                 box_pos=exit_box.get_rect()#pygame.Rect((dis_x//2)-160, (dis_y//2)-30, (dis_x//2)+160, (dis_y//2)+30)
@@ -979,8 +1171,8 @@ while on:
                 screen.blit(set_text, set_post)
                 #print (type(box.get_rect()))
                 #check if player clicked anything
-                if pygame.mouse.get_pressed()[0]:
-                    mouse=pygame.mouse.get_pos()
+                if get_click():#pygame.mouse.get_pressed()[0]:
+                    mouse=get_mouse()#pygame.mouse.get_pos()
                     if box_pos.collidepoint(*mouse):
                         on=False
                     elif shop_pos.collidepoint(*mouse):
@@ -997,10 +1189,12 @@ while on:
                         inshop=False
                         setmove=False
                         setgen=False
+                        setcon=False
                         cooldown=10
                 
             #draw cursor
-            p=pygame.mouse.get_pos()
+            p=get_mouse()#pygame.mouse.get_pos()
+            p=round_tuple(p)
             pygame.draw.circle(screen, white, p, 30, 3)
             pygame.draw.circle(screen, black, p, 10, 2)
             if pygame.mouse.get_pressed()[0]:
@@ -1019,6 +1213,11 @@ while on:
                 inad=False
                 insettings=False
                 cooldown=10
+                if controller[9]:
+                    use_con=True
+                    con_pos=[dis_x//2, dis_y//2]
+                else:
+                    use_con=False
         #else:
         #    cooldown-=1
         if not inmenu:
@@ -1031,10 +1230,10 @@ while on:
                 if press[pygame.K_c] or controller[3]:
                     event_text=random.choice(['got a meme!', 'Yay! you unlocked a meme channel!', '[incert text here]', 'this is text'])
             if cooldown<=0:
-                if press[controls[4]] or controller[1]:#pygame.K_e]:
+                if press[controls[4]] or controller[cont_controls[0]]:#pygame.K_e]:
                     pickup_egg(pos)
                     cooldown=10
-                if press[controls[5]] or controller[0]:#pygame.K_q]:
+                if press[controls[5]] or controller[cont_controls[1]]:#pygame.K_q]:
                     crack_egg(pos)
                     cooldown=10
                 if dev_mode==True:
@@ -1087,6 +1286,12 @@ while on:
     #show_eggs()
     #update display and wait
     cooldown-=1
+    if use_con:
+        controller=get_controller()
+        if inmenu or instart:
+            con_mouse()
+        if controller[cont_controls[2]]:
+            con_pos=[dis_x//2, dis_y//2]
     pygame.display.update()
     clock.tick(30)
 

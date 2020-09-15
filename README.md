@@ -21,7 +21,7 @@ q / x - crack egg
 z / RT - spawn eggs
 x / LT - spawn chickens
 c / y - show random text
-v / b - change avatar
+v / back - change avatar
 b / LB - on/off show accessories
 n / RB - on/off generate accessories
 
